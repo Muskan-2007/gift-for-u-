@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Love Surprise</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #ff9a9e;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: linear-gradient(135deg, #ffafbd 0%, #ffc3a0 100%);
+        }
+
+        /* Start Overlay */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease;
+        }
+
+        .container {
+            position: relative;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            max-width: 350px;
+            width: 85%;
+            z-index: 10;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .step { display: none; }
+        .step.active { display: block; }
+
+        img {
+            width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        p { color: #d81b60; font-weight: 600; font-size: 1.1rem; }
+
+        button {
+            padding: 12px 28px;
+            border: none;
+            background: #ff4d6d;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 77, 109, 0.3);
+        }
+
+        button:hover { transform: scale(1.1); background: #ff758f; }
+
+        #musicStatus {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255,255,255,0.8);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #d81b60;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="overlay">
+        <h2 style="color: #ff4d6d; font-family: cursive;">something special for u❤</h2>
+        <p style="color: #888;">Tap to see my surprise</p>
+        <button onclick="initExperience()" style="font-size: 1.2rem; padding: 20px 40px;">Open My Heart</button>
+    </div>
+
+    <div id="canvas-container"></div>
+    <div id="musicStatus" style="display:none;">🎵 Itni Si Baat Hai</div>
+
+    <audio id="bgMusic" loop preload="auto">
+        <source src="Ishqa Ve-Downringtone.com.mp3">
+    </audio>
+
+    <div class="container" id="mainCard" style="display: none;">
+        <div id="step1" class="step active">
+            <img src="37531.png.jpg" alt="Greeting">
+            <p>Hey! I made something for you.<br>Will you see it? ❤</p>
+            <div style="display:flex; justify-content:center; gap:10px;">
+                <button onclick="nextStep(2)">Yes, I will!</button>
+                <button onclick="showAngry()">No</button>
+            </div>
+        </div>
+
+        <div id="angry" class="step">
+            <img src="37532.png.jpg" alt="Angry">
+            <p>HOW DARE YOUUU! 😤</p>
+            <button onclick="nextStep(1)">Back and Say Yes!</button>
+        </div>
+
+        <div id="step2" class="step">
+            <img src="37533.png.jpg" alt="Shy">
+            <p>Hehe! You're so sweet...<br>Click for a surprise!! ✨</p>
+            <button onclick="nextStep(3)">Show me!</button>
+        </div>
+
+        <div id="step3" class="step">
+            <img src="37534.png.jpg" alt="Flowers">
+            <p>May Allah grant you peace,good health,and barakah in the coming year.Ameen❤️ Happy new year Sam❤️!! 🌸</p>
+            <button onclick="nextStep(4)">🎁 Open Gift</button>
+        </div>
+
+        <div id="step4" class="step">
+            <img src="37535.png.jpg" alt="Camera">
+            <p>SMILEEEEE! 📸</p>
+            <button onclick="nextStep(5)">Reveal Photo</button>
+        </div>
+
+        <div id="step5" class="step">
+            <img src="37537.png.jpg" style="border: 8px solid white; box-shadow: 0 8px 20px rgba(0,0,0,0.15);" alt="Us">
+            <p style="font-size: 1.5rem; color: #d81b60;">I Love You Forever ❤</p>
+        </div>
+    </div>
+
+    <script>
+        function initExperience() {
+            const music = document.getElementById('bgMusic');
+            
+            // Start music immediately
+            music.play().then(() => {
+                document.getElementById('musicStatus').style.display = 'block';
+            }).catch(e => console.log("Music waiting for interaction"));
+
+            document.getElementById('overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById('mainCard').style.display = 'block';
+            }, 800);
+            
+            init3D();
+        }
+
+        function nextStep(num) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + num).classList.add('active');
+            // Ensure music keeps playing
+            document.getElementById('bgMusic').play();
+        }
+
+        function showAngry() {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('angry').classList.add('active');
+        }
+
+        function init3D() {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Create a Heart Shape for 3D objects
+            const x = 0, y = 0;
+            const heartShape = new THREE.Shape();
+            heartShape.moveTo( x + 5, y + 5 );
+            heartShape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
+            heartShape.bezierCurveTo( x - 6, y, x - 6, y + 7,x - 6, y + 7 );
+            heartShape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
+            heartShape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
+            heartShape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
+            heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
+
+            const geometry = new THREE.ShapeGeometry(heartShape);
+            const material = new THREE.MeshPhongMaterial({ color: 0xff4d6d, side: THREE.DoubleSide });
+            const objects = [];
+
+            for (let i = 0; i < 30; i++) {
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.scale.set(0.05, 0.05, 0.05);
+                mesh.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*10);
+                mesh.rotation.z = Math.PI; // Correct orientation
+                scene.add(mesh);
+                objects.push(mesh);
+            }
+
+            const light = new THREE.PointLight(0xffffff, 1, 100);
+            light.position.set(10, 10, 10);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            camera.position.z = 10;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                objects.forEach(o => {
+                    o.rotation.y += 0.02;
+                    o.position.y += 0.01;
+                    if(o.position.y > 10) o.position.y = -10;
+                });
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+    </script>
+</body>
+</html>
